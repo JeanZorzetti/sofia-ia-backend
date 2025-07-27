@@ -2,10 +2,10 @@
   "name": "lais-ia-backend",
   "version": "1.0.0",
   "description": "Sistema SDR Inteligente para Imobiliárias - Backend API",
-  "main": "src/app.js",
+  "main": "src/app-minimal.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
+    "start": "node src/app-minimal.js",
+    "dev": "nodemon src/app-minimal.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -147,6 +147,6 @@
     "watch": ["src"],
     "ext": "js,json",
     "ignore": ["src/**/*.test.js", "logs/*", "uploads/*"],
-    "exec": "node src/app.js"
+    "exec": "node src/app-minimal.js"
   }
 }
