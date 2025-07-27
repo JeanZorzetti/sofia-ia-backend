@@ -1,0 +1,60 @@
+[
+  {
+    "name": "LAIS IA - WhatsApp Message Processing",
+    "nodes": [
+      {
+        "name": "WhatsApp Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "path": "whatsapp-message",
+          "httpMethod": "POST"
+        }
+      },
+      {
+        "name": "Process Lead",
+        "type": "n8n-nodes-base.httpRequest",
+        "position": [
+          460,
+          300
+        ],
+        "parameters": {
+          "url": "https://lais-ia-api.roilabs.com.br/api/leads",
+          "method": "POST"
+        }
+      }
+    ]
+  },
+  {
+    "name": "LAIS IA - Lead Qualified to CRM",
+    "nodes": [
+      {
+        "name": "Lead Qualified Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "position": [
+          240,
+          300
+        ],
+        "parameters": {
+          "path": "lead-qualified",
+          "httpMethod": "POST"
+        }
+      },
+      {
+        "name": "Send to Pipedrive",
+        "type": "n8n-nodes-base.pipedrive",
+        "position": [
+          460,
+          300
+        ],
+        "parameters": {
+          "operation": "create",
+          "resource": "person"
+        }
+      }
+    ]
+  }
+]

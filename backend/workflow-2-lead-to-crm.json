@@ -1,0 +1,42 @@
+{
+  "name": "LAIS IA - Lead Qualified to CRM",
+  "nodes": [
+    {
+      "name": "Lead Qualified Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {
+        "path": "lead-qualified",
+        "httpMethod": "POST"
+      }
+    },
+    {
+      "name": "Send to Pipedrive",
+      "type": "n8n-nodes-base.pipedrive",
+      "position": [
+        460,
+        300
+      ],
+      "parameters": {
+        "operation": "create",
+        "resource": "person"
+      }
+    }
+  ],
+  "connections": {
+    "Lead Qualified Webhook": {
+      "main": [
+        [
+          {
+            "node": "Send to Pipedrive",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
