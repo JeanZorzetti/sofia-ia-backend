@@ -1,51 +1,28 @@
 {
   "name": "lais-ia-backend",
-  "version": "1.0.0",
-  "description": "Sistema SDR Inteligente para Imobiliárias - Backend API",
-  "main": "src/app-minimal.js",
+  "version": "2.0.0",
+  "description": "Sistema SDR Inteligente - Stub Service (N8N Powered)",
+  "main": "src/app-stub.js",
   "scripts": {
-    "start": "node src/app-minimal.js",
-    "dev": "nodemon src/app-minimal.js",
+    "start": "node src/app-stub.js",
+    "dev": "nodemon src/app-stub.js",
     "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    
-    "setup": "node setup.js",
-    "migrate": "node -e \"require('./src/services/database.service').runMigrations()\"",
-    "seed": "node scripts/seed.js",
-    "backup": "node scripts/backup.js",
     
     "build": "echo 'No build step required for Node.js'",
-    "lint": "eslint src --ext .js",
-    "lint:fix": "eslint src --ext .js --fix",
-    "format": "prettier --write src/**/*.js",
-    
-    "docker:build": "docker build -t lais-ia-backend .",
-    "docker:run": "docker run -p 8000:8000 --env-file .env lais-ia-backend",
-    
-    "logs": "tail -f logs/app.log",
-    "logs:error": "tail -f logs/error.log",
     "health": "curl -f http://localhost:8000/health || exit 1",
     
-    "pm2:start": "pm2 start ecosystem.config.js",
-    "pm2:stop": "pm2 stop lais-ia-backend",
-    "pm2:restart": "pm2 restart lais-ia-backend",
-    "pm2:logs": "pm2 logs lais-ia-backend",
-    
-    "clean": "rm -rf node_modules package-lock.json && npm install",
-    "reset": "rm -rf logs/* uploads/* temp/* && npm run migrate"
+    "docker:build": "docker build -t lais-ia-backend .",
+    "docker:run": "docker run -p 8000:8000 --env-file .env lais-ia-backend"
   },
   "keywords": [
     "whatsapp",
-    "evolution-api", 
-    "claude-ai",
     "real-estate",
     "sdr",
     "automation",
-    "lead-qualification",
     "chatbot",
-    "imobiliaria",
-    "crm"
+    "n8n",
+    "stub-service",
+    "microservices"
   ],
   "author": {
     "name": "ROI Labs",
@@ -55,98 +32,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/roilabs/lais-ia-backend.git"
+    "url": "https://github.com/JeanZorzetti/lais-ia-sdr.git"
   },
-  "bugs": {
-    "url": "https://github.com/roilabs/lais-ia-backend/issues"
-  },
-  "homepage": "https://github.com/roilabs/lais-ia-backend#readme",
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "helmet": "^7.0.0",
-    "dotenv": "^16.3.1",
-    "axios": "^1.4.0",
-    "socket.io": "^4.7.2",
-    "jsonwebtoken": "^9.0.1",
-    "bcryptjs": "^2.4.3",
-    "joi": "^17.9.2",
-    "winston": "^3.10.0",
-    "compression": "^1.7.4",
-    "rate-limiter-flexible": "^2.4.2",
-    
-    "@anthropic-ai/sdk": "^0.24.3",
-    "openai": "^4.52.7",
-    
-    "pg": "^8.11.1",
-    "pgvector": "^0.1.6",
-    "knex": "^2.5.1",
-    "redis": "^4.6.7",
-    "ioredis": "^5.3.2",
-    
-    "puppeteer": "^21.0.3",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
-    "puppeteer-extra-plugin-recaptcha": "^3.6.8",
-    
-    "multer": "^1.4.5-lts.1",
-    "sharp": "^0.32.4",
-    "node-cron": "^3.0.2",
-    "moment": "^2.29.4",
-    "uuid": "^9.0.0",
-    "lodash": "^4.17.21",
-    
-    "ws": "^8.13.0",
-    "qrcode": "^1.5.3",
-    "node-fetch": "^3.3.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1",
-    "jest": "^29.6.1",
-    "supertest": "^6.3.3",
-    "@types/node": "^20.4.5",
-    "eslint": "^8.45.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-plugin-node": "^11.1.0",
-    "prettier": "^3.0.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^13.2.3"
+    "dotenv": "^16.3.1"
   },
   "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=8.0.0"
-  },
-  "os": ["linux", "darwin", "win32"],
-  "cpu": ["x64", "arm64"],
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
-  "lint-staged": {
-    "src/**/*.js": [
-      "eslint --fix",
-      "prettier --write",
-      "git add"
-    ]
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "coverageDirectory": "coverage",
-    "collectCoverageFrom": [
-      "src/**/*.js",
-      "!src/app.js",
-      "!src/**/*.test.js"
-    ],
-    "testMatch": [
-      "**/__tests__/**/*.js",
-      "**/?(*.)+(spec|test).js"
-    ]
-  },
-  "nodemonConfig": {
-    "watch": ["src"],
-    "ext": "js,json",
-    "ignore": ["src/**/*.test.js", "logs/*", "uploads/*"],
-    "exec": "node src/app-minimal.js"
+    "node": ">=18.0.0"
   }
 }
