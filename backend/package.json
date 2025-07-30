@@ -1,28 +1,26 @@
 {
   "name": "lais-ia-backend",
   "version": "2.0.0",
-  "description": "Sistema SDR Inteligente - Stub Service (N8N Powered)",
-  "main": "src/app-stub.js",
+  "description": "LAIS IA - Sistema SDR Inteligente para Imobiliárias",
+  "main": "src/app.js",
   "scripts": {
-    "start": "node src/app-stub.js",
-    "dev": "nodemon src/app-stub.js",
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
     "test": "jest",
-    
     "build": "echo 'No build step required for Node.js'",
     "health": "curl -f http://localhost:8000/health || exit 1",
-    
     "docker:build": "docker build -t lais-ia-backend .",
     "docker:run": "docker run -p 8000:8000 --env-file .env lais-ia-backend"
   },
   "keywords": [
     "whatsapp",
-    "real-estate",
+    "real-estate", 
     "sdr",
     "automation",
     "chatbot",
-    "n8n",
-    "stub-service",
-    "microservices"
+    "claude-ai",
+    "evolution-api",
+    "enterprise"
   ],
   "author": {
     "name": "ROI Labs",
@@ -35,7 +33,26 @@
     "url": "https://github.com/JeanZorzetti/lais-ia-sdr.git"
   },
   "dependencies": {
-    "dotenv": "^16.3.1"
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "helmet": "^7.0.0",
+    "compression": "^1.7.4",
+    "socket.io": "^4.7.2",
+    "dotenv": "^16.3.1",
+    "winston": "^3.10.0",
+    "joi": "^17.9.2",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.2",
+    "axios": "^1.5.0",
+    "pg": "^8.11.3",
+    "redis": "^4.6.8",
+    "@anthropic-ai/sdk": "^0.24.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1",
+    "jest": "^29.6.2"
   },
   "engines": {
     "node": ">=18.0.0"
