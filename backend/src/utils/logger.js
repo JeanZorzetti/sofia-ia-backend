@@ -254,9 +254,14 @@ logger.stream = {
     }
 };
 
+// CORREÇÃO: Export direto das funções do winston logger
 module.exports = {
-    // Logger principal
-    ...logger,
+    // Funções principais do winston (CORRIGIDO)
+    error: logger.error.bind(logger),
+    warn: logger.warn.bind(logger),
+    info: logger.info.bind(logger),
+    debug: logger.debug.bind(logger),
+    verbose: logger.verbose.bind(logger),
     
     // Loggers especializados
     api: apiLogger,
@@ -273,5 +278,8 @@ module.exports = {
     timer,
     
     // Utilidades
-    createModuleLogger
+    createModuleLogger,
+    
+    // Logger winston original para casos especiais
+    winston: logger
 };
