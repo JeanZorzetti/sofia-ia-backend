@@ -1,0 +1,230 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* SOFIA IA Premium Design System - Pure Black Theme */
+
+@layer base {
+  :root {
+    /* Sofia Premium Color Palette - Pure Black Theme */
+    --background: 0 0% 0%;              /* Pure black #000000 */
+    --foreground: 0 0% 100%;            /* Pure white text */
+
+    --card: 0 0% 4%;                    /* Void black #0a0a0a */
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 100%;
+
+    --primary: 0 0% 100%;               /* White for primary actions */
+    --primary-foreground: 0 0% 0%;      /* Black text on white */
+
+    --secondary: 0 0% 10%;              /* Charcoal #1a1a1a */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 6%;                   /* Subtle card background */
+    --muted-foreground: 0 0% 70%;       /* rgba(255,255,255,0.7) */
+
+    --accent: 0 0% 10%;                 /* Interactive elements */
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;                 /* Subtle white borders */
+    --input: 0 0% 10%;
+    --ring: 0 0% 100%;
+
+    --radius: 1.25rem;                  /* 20px for premium rounded corners */
+    
+    /* Sofia Custom Design Tokens */
+    --text-secondary: 0 0% 70%;         /* rgba(255,255,255,0.7) equivalent */
+    --text-tertiary: 0 0% 50%;          /* rgba(255,255,255,0.5) equivalent */
+    --border-subtle: 0 0% 5%;           /* Very subtle borders */
+    --border-interactive: 0 0% 20%;     /* Interactive borders */
+    
+    /* Premium Gradients */
+    --gradient-hero: radial-gradient(ellipse at center, rgba(255,255,255,0.03) 0%, transparent 70%);
+    --gradient-card: linear-gradient(145deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.01) 100%);
+    --gradient-cta: radial-gradient(circle at center, rgba(255,255,255,0.08) 0%, transparent 70%);
+    
+    /* Premium Shadows & Glows */
+    --shadow-card: 0 4px 20px rgba(0,0,0,0.3);
+    --shadow-card-hover: 0 8px 40px rgba(255,255,255,0.05), 0 0 0 1px rgba(255,255,255,0.1);
+    --glow-primary: 0 0 30px rgba(255,255,255,0.1);
+    
+    /* Premium Typography */
+    --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', system-ui, sans-serif;
+    --font-weight-ultra-light: 100;
+    --font-weight-light: 300;
+    --letter-spacing-tight: -0.02em;
+    --letter-spacing-wide: 0.05rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+}
+
+/* Premium Utility Classes */
+@layer components {
+  .font-system {
+    font-family: var(--font-system);
+  }
+  
+  .text-secondary {
+    color: hsl(var(--text-secondary));
+  }
+  
+  .text-tertiary {
+    color: hsl(var(--text-tertiary));
+  }
+  
+  .border-subtle {
+    border-color: hsl(var(--border-subtle));
+  }
+  
+  .border-interactive {
+    border-color: hsl(var(--border-interactive));
+  }
+  
+  .gradient-hero {
+    background: var(--gradient-hero);
+  }
+  
+  .gradient-card {
+    background: var(--gradient-card);
+  }
+  
+  .gradient-cta {
+    background: var(--gradient-cta);
+  }
+  
+  .shadow-card {
+    box-shadow: var(--shadow-card);
+  }
+  
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+  
+  .glow-primary {
+    box-shadow: var(--glow-primary);
+  }
+  
+  /* Premium Animation Classes */
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
+  }
+  
+  .animate-stagger-1 {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out 0.1s forwards;
+  }
+  
+  .animate-stagger-2 {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out 0.2s forwards;
+  }
+  
+  .animate-stagger-3 {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out 0.3s forwards;
+  }
+  
+  .animation-delay-500 {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out 0.5s forwards;
+  }
+  
+  .animation-delay-700 {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out 0.7s forwards;
+  }
+  
+  .animation-delay-1000 {
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out 1s forwards;
+  }
+  
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+  
+  .backdrop-blur-premium {
+    backdrop-filter: blur(20px);
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Premium Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.2);
+  }
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-system;
+  }
+  
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Selection styling */
+  ::selection {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}

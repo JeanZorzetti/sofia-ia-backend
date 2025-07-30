@@ -1,0 +1,27 @@
+        if (pathname.startsWith('/api/users') && method === 'POST') {
+            return {
+                statusCode: 200,
+                data: {
+                    success: true,
+                    user_id: `user_${Date.now()}`,
+                    message: 'User created successfully (stub)',
+                    email: body.email,
+                    name: body.name,
+                    plan: body.plan,
+                    temp_password: 'temp123'
+                }
+            };
+        }
+
+        if (pathname.startsWith('/api/whatsapp/create-instance') && method === 'POST') {
+            return {
+                statusCode: 200,
+                data: {
+                    success: true,
+                    instance_name: body.instance_name,
+                    instance_id: `instance_${Date.now()}`,
+                    qr_code: 'https://example.com/qr.png',
+                    status: 'created'
+                }
+            };
+        }
