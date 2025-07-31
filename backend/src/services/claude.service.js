@@ -11,9 +11,9 @@ const Anthropic = require('@anthropic-ai/sdk');
 const logger = require('../utils/logger');
 
 class ClaudeService {
-    constructor(config) {
+    constructor(config = {}) {
         this.client = new Anthropic({
-            apiKey: config.apiKey,
+            apiKey: config.apiKey || process.env.ANTHROPIC_API_KEY,
         });
         
         this.model = config.model || 'claude-3-5-sonnet-20241022';
@@ -28,6 +28,138 @@ class ClaudeService {
         };
         
         logger.info('🧠 Claude AI Service initialized with model:', this.model);
+    }
+
+    /**
+     * 🆕 MÉTODO PRINCIPAL PARA TESTES - Processa mensagem e retorna resposta
+     */
+    async processMessage(message, context = {}) {
+        try {
+            const startTime = Date.now();
+            
+            // Contexto padrão se não fornecido
+            const defaultContext = {
+                leadId: 'test-lead',
+                phone: '+5511999887766',
+                name: 'Cliente',
+                conversationHistory: []
+            };
+            
+            const fullContext = { ...defaultContext, ...context };
+            
+            // Sistema prompt baseado no contexto
+            const systemPrompt = this.getConversationPrompt();
+            
+            // Constrói histórico de conversa
+            const conversationContext = this.buildConversationContext(fullContext, fullContext.conversationHistory || []);
+            
+            // Prompt para Claude
+            const prompt = `
+CONTEXTO DO LEAD:
+- Nome: ${fullContext.name}
+- Telefone: ${fullContext.phone}
+- ID: ${fullContext.leadId}
+
+HISTÓRICO DA CONVERSA:
+${conversationContext}
+
+MENSAGEM ATUAL DO CLIENTE:
+"${message}"
+
+INSTRUÇÕES:
+1. Responda como consultor imobiliário especialista
+2. Seja natural, empático e profissional  
+3. Faça perguntas inteligentes para qualificar o lead
+4. Identifique necessidades e preferências
+5. Conduza a conversa para agendamento de visita
+6. Extraia informações importantes (orçamento, localização, tipo de imóvel)
+
+Retorne um JSON com:
+{
+    "reply": "sua resposta ao cliente",
+    "extractedData": {
+        "propertyType": "apartamento|casa|terreno|comercial ou null",
+        "budget": "valor estimado ou null", 
+        "location": "região/cidade mencionada ou null",
+        "bedrooms": "número de quartos ou null",
+        "urgency": "baixa|media|alta ou null",
+        "intent": "interesse_inicial|busca_info|agendamento|negociacao|outros"
+    },
+    "nextAction": "próxima ação recomendada",
+    "confidence": "0-100"
+}
+            `;
+
+            // Chama Claude API
+            const response = await this.client.messages.create({
+                model: this.model,
+                max_tokens: this.maxTokens,
+                system: systemPrompt,
+                messages: [
+                    {
+                        role: 'user',
+                        content: prompt
+                    }
+                ]
+            });
+
+            const responseTime = Date.now() - startTime;
+            const aiResponseText = response.content[0].text;
+            
+            // Tenta fazer parse do JSON, se falhar retorna resposta estruturada
+            let parsedResponse;
+            try {
+                parsedResponse = JSON.parse(aiResponseText);
+            } catch (parseError) {
+                logger.warn('⚠️ Failed to parse Claude JSON response, using fallback structure');
+                parsedResponse = {
+                    reply: aiResponseText,
+                    extractedData: {
+                        propertyType: null,
+                        budget: null,
+                        location: null,
+                        bedrooms: null,
+                        urgency: "media",
+                        intent: "conversa_geral"
+                    },
+                    nextAction: "Continuar conversa",
+                    confidence: 75
+                };
+            }
+            
+            logger.info('🧠 Message processed successfully:', {
+                leadId: fullContext.leadId,
+                messageLength: message.length,
+                responseTime: `${responseTime}ms`,
+                intent: parsedResponse.extractedData?.intent
+            });
+
+            return {
+                ...parsedResponse,
+                responseTime,
+                tokensUsed: response.usage?.total_tokens || 0,
+                model: this.model
+            };
+
+        } catch (error) {
+            logger.error('❌ Claude message processing failed:', error);
+            
+            // Resposta de fallback
+            return {
+                reply: this.getFallbackResponse(message),
+                extractedData: {
+                    propertyType: null,
+                    budget: null,
+                    location: null,
+                    bedrooms: null,
+                    urgency: "media",
+                    intent: "conversa_geral"
+                },
+                nextAction: "Continuar conversa",
+                confidence: 50,
+                error: error.message
+            };
+        }
     }
 
     /**
@@ -470,19 +602,19 @@ TÉCNICAS:
     }
 
     buildConversationContext(lead, history) {
-        if (!history || history.length === 0) return 'Primeira interação';
+        if (!history || history.length === 0) return 'Primeira interação com o cliente';
         
         return history.slice(-10).map(msg => 
-            `${msg.sender === 'ai' ? 'Consultor' : lead.name}: ${msg.content}`
+            `${msg.sender === 'ai' ? 'Consultor' : (lead?.name || 'Cliente')}: ${msg.content}`
         ).join('\n');
     }
 
-    getFallbackResponse(context) {
+    getFallbackResponse(messageOrContext) {
         const fallbacks = [
-            "Que interessante! Conte-me mais sobre isso.",
-            "Entendo. Deixe-me verificar as melhores opções para você.",
-            "Ótima pergunta! Vou te ajudar com isso.",
-            "Perfeito! Vamos encontrar exatamente o que você precisa."
+            "Que interessante! Conte-me mais sobre o que você está procurando.",
+            "Entendo suas necessidades. Deixe-me verificar as melhores opções para você.",
+            "Ótima pergunta! Vou te ajudar a encontrar exatamente o que precisa.",
+            "Perfeito! Com base no que você mencionou, posso te mostrar algumas excelentes oportunidades."
         ];
         
         return fallbacks[Math.floor(Math.random() * fallbacks.length)];
@@ -561,4 +693,7 @@ TÉCNICAS:
     }
 }
 
-module.exports = ClaudeService;
+// Cria instância singleton
+const claudeService = new ClaudeService();
+
+module.exports = claudeService;

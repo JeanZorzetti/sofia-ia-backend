@@ -3,3 +3,7 @@
 {"timestamp":"2025-07-30T13:49:06.390Z","level":"error","message":"❌ Uncaught Exception:"}
 {"timestamp":"2025-07-30T13:49:06.390Z","level":"error","message":"Stack:"}
 {"timestamp":"2025-07-30T13:49:30.501Z","level":"error","message":"❌ Database connection failed:","module":"DATABASE"}
+{"timestamp":"2025-07-30T15:12:29.225Z","level":"error","message":"❌ Database connection failed:","module":"DATABASE"}
+{"timestamp":"2025-07-30T15:12:29.228Z","level":"error","message":"❌ Database initialization failed:"}
+{"timestamp":"2025-07-30T15:12:29.234Z","level":"error","message":"❌ Uncaught Exception:"}
+{"timestamp":"2025-07-30T15:12:29.234Z","level":"error","message":"Stack:"}

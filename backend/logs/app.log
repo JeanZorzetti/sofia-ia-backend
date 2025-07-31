@@ -75,3 +75,33 @@
 {"timestamp":"2025-07-30T13:54:28.919Z","level":"info","message":"GET /admin/dashboard - ::1"}
 {"timestamp":"2025-07-30T13:54:35.649Z","level":"info","message":"GET /webhooks/test - ::1"}
 {"timestamp":"2025-07-30T13:54:35.649Z","level":"info","message":"🧪 Webhook test endpoint called"}
+{"timestamp":"2025-07-30T15:12:28.966Z","level":"info","message":"✅ EvolutionApiService loaded"}
+{"timestamp":"2025-07-30T15:12:29.119Z","level":"info","message":"✅ ClaudeService loaded"}
+{"timestamp":"2025-07-30T15:12:29.197Z","level":"info","message":"✅ LeadQualificationService loaded"}
+{"timestamp":"2025-07-30T15:12:29.198Z","level":"info","message":"✅ DatabaseService loaded"}
+{"timestamp":"2025-07-30T15:12:29.203Z","level":"info","message":"✅ Webhook routes loaded"}
+{"timestamp":"2025-07-30T15:12:29.206Z","level":"info","message":"✅ API routes loaded"}
+{"timestamp":"2025-07-30T15:12:29.208Z","level":"info","message":"✅ Admin routes loaded"}
+{"timestamp":"2025-07-30T15:12:29.214Z","level":"info","message":"🔄 Setting up middleware..."}
+{"timestamp":"2025-07-30T15:12:29.220Z","level":"info","message":"✅ Middleware setup completed"}
+{"timestamp":"2025-07-30T15:12:29.221Z","level":"info","message":"🔄 Setting up routes..."}
+{"timestamp":"2025-07-30T15:12:29.221Z","level":"info","message":"✅ Webhook routes registered"}
+{"timestamp":"2025-07-30T15:12:29.221Z","level":"info","message":"✅ API routes registered"}
+{"timestamp":"2025-07-30T15:12:29.222Z","level":"info","message":"✅ Admin routes registered"}
+{"timestamp":"2025-07-30T15:12:29.222Z","level":"info","message":"✅ Routes setup completed"}
+{"timestamp":"2025-07-30T15:12:29.222Z","level":"info","message":"🔄 Setting up error handling..."}
+{"timestamp":"2025-07-30T15:12:29.223Z","level":"info","message":"✅ Error handling setup completed"}
+{"timestamp":"2025-07-30T15:12:29.223Z","level":"info","message":"🚀 Starting LAIS IA Backend..."}
+{"timestamp":"2025-07-30T15:12:29.223Z","level":"info","message":"📊 Step 1: Initializing Database..."}
+{"timestamp":"2025-07-30T15:12:29.223Z","level":"info","message":"🔄 Connecting to database..."}
+{"timestamp":"2025-07-30T15:12:29.225Z","level":"error","message":"❌ Database connection failed:","module":"DATABASE"}
+{"timestamp":"2025-07-30T15:12:29.227Z","level":"error","message":"❌ Database initialization failed:"}
+{"timestamp":"2025-07-30T15:12:29.228Z","level":"info","message":"🤖 Step 2: Initializing AI Services..."}
+{"timestamp":"2025-07-30T15:12:29.228Z","level":"info","message":"🔄 Initializing AI services..."}
+{"timestamp":"2025-07-30T15:12:29.228Z","level":"info","message":"✅ Claude AI service available"}
+{"timestamp":"2025-07-30T15:12:29.228Z","level":"info","message":"✅ Lead Qualification service available"}
+{"timestamp":"2025-07-30T15:12:29.228Z","level":"info","message":"✅ Evolution API (WhatsApp) service available"}
+{"timestamp":"2025-07-30T15:12:29.228Z","level":"info","message":"✅ AI services initialization completed"}
+{"timestamp":"2025-07-30T15:12:29.228Z","level":"info","message":"🌐 Step 3: Starting HTTP Server..."}
+{"timestamp":"2025-07-30T15:12:29.234Z","level":"error","message":"❌ Uncaught Exception:"}
+{"timestamp":"2025-07-30T15:12:29.234Z","level":"error","message":"Stack:"}
