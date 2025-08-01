@@ -1,0 +1,50 @@
+# 🚀 Sofia IA - Docker Ignore File
+
+# Node modules (serão instalados no container)
+**/node_modules
+**/npm-debug.log*
+
+# Logs
+**/logs
+**/*.log
+
+# Git
+**/.git
+**/.gitignore
+
+# Frontend (não necessário para backend)
+frontend/
+
+# Scripts locais
+**/*.bat
+**/*.sh
+
+# Documentação
+**/*.md
+**/docs
+
+# Environment local (usará do EasyPanel)
+**/.env
+**/.env.local
+**/.env.development
+**/.env.production
+
+# Cache
+**/.npm
+**/.cache
+
+# IDEs
+**/.vscode
+**/.idea
+
+# OS
+**/.DS_Store
+**/Thumbs.db
+
+# Arquivos de teste
+**/test-*
+**/*test.js
+
+# Arquivos temporários
+**/tmp
+**/temp
