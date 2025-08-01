@@ -6,7 +6,7 @@
 import { useState, useEffect } from 'react';
 
 // 📍 Base URL do backend
-const API_BASE_URL = 'http://localhost:8000';
+const API_BASE_URL = 'https://sofiaia.roilabs.com.br';
 
 // 🔄 Types para TypeScript
 interface DashboardStats {
