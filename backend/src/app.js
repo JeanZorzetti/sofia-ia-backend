@@ -187,6 +187,38 @@ const db = new MetricsDatabase();
 
 // 🚀 ENDPOINTS DA API
 
+// 🏠 Rota raiz - Página inicial da API
+app.get('/', (req, res) => {
+    console.log('🏠 Página inicial da API acessada');
+    res.json({
+        service: 'Sofia IA Backend',
+        version: '2.0.0',
+        status: 'online',
+        description: 'Sistema SDR Inteligente para Imobiliárias',
+        documentation: {
+            health: '/health',
+            dashboard: '/api/dashboard/overview',
+            conversations: '/api/conversations/recent',
+            leads: '/api/leads',
+            analytics: '/api/analytics/detailed',
+            realtime: '/api/realtime/stats'
+        },
+        features: [
+            'Dashboard Analytics em tempo real',
+            'Gestão de leads com IA',
+            'Conversas WhatsApp automatizadas',
+            'Relatórios avançados',
+            'API RESTful completa'
+        ],
+        developer: {
+            company: 'ROI Labs',
+            contact: 'contato@roilabs.com.br',
+            repository: 'https://github.com/JeanZorzetti/sofia-ia-backend'
+        },
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Health check
 app.get('/health', (req, res) => {
     console.log('📊 Health check requisitado');
@@ -407,6 +439,7 @@ process.on('SIGTERM', () => {
 
 // 📝 Log das rotas disponíveis
 console.log('\n📋 ROTAS DISPONÍVEIS:');
+console.log('GET  /                          - Página inicial da API');
 console.log('GET  /health                    - Health check');
 console.log('GET  /api/dashboard/overview    - Métricas dashboard');
 console.log('GET  /api/conversations/recent  - Conversas recentes');
