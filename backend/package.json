@@ -1,7 +1,7 @@
 {
-  "name": "lais-ia-backend",
+  "name": "sofia-ia-backend",
   "version": "2.0.0",
-  "description": "LAIS IA - Sistema SDR Inteligente para Imobiliárias",
+  "description": "Sofia IA - Sistema SDR Inteligente para Imobiliárias",
   "main": "src/app.js",
   "scripts": {
     "start": "node src/app.js",
@@ -9,8 +9,8 @@
     "test": "jest",
     "build": "echo 'No build step required for Node.js'",
     "health": "curl -f http://localhost:8000/health || exit 1",
-    "docker:build": "docker build -t lais-ia-backend .",
-    "docker:run": "docker run -p 8000:8000 --env-file .env lais-ia-backend"
+    "docker:build": "docker build -t sofia-ia-backend .",
+    "docker:run": "docker run -p 8000:8000 --env-file .env sofia-ia-backend"
   },
   "keywords": [
     "whatsapp",
@@ -30,7 +30,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/JeanZorzetti/lais-ia-sdr.git"
+    "url": "https://github.com/JeanZorzetti/sofia-ia-sdr.git"
   },
   "dependencies": {
     "express": "^4.18.2",

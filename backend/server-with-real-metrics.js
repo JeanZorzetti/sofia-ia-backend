@@ -3,14 +3,13 @@
  * Servidor Express com endpoints para dashboard real
  */
 
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = 8000;
 
 // Middleware
 app.use(cors());
@@ -195,9 +194,7 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
         service: 'Sofia IA Backend',
         version: '2.0.0',
-        uptime: process.uptime(),
-        environment: process.env.NODE_ENV || 'development',
-        port: PORT
+        uptime: process.uptime()
     });
 });
 
@@ -379,14 +376,13 @@ app.listen(PORT, () => {
     console.log('🚀 SOFIA IA BACKEND INICIADO!');
     console.log('🏠 ===================================');
     console.log(`📍 URL: http://localhost:${PORT}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`📊 Health: http://localhost:${PORT}/health`);
     console.log(`📈 Dashboard: http://localhost:${PORT}/api/dashboard/overview`);
     console.log(`💬 Conversas: http://localhost:${PORT}/api/conversations/recent`);
     console.log(`👥 Leads: http://localhost:${PORT}/api/leads`);
     console.log('🏠 ===================================');
     console.log('✅ Pronto para conectar com o frontend!');
-    console.log(`🔗 Configure o frontend para: http://localhost:${PORT}`);
+    console.log('🔗 Configure o frontend para: http://localhost:8000');
     console.log('🏠 ===================================');
 });
 
@@ -416,6 +412,3 @@ console.log('GET  /api/analytics/detailed    - Analytics completos');
 console.log('GET  /api/analytics/period      - Métricas por período');
 console.log('GET  /api/realtime/stats        - Stats em tempo real');
 console.log('');
-
-// Exportar app para testes
-module.exports = app;

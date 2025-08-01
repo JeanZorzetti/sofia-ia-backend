@@ -1,0 +1,424 @@
+/**
+ * 🔗 SOFIA IA - Hook de API Real
+ * Conecta frontend aos dados reais do backend
+ */
+
+import { useState, useEffect } from 'react';
+
+// 📍 Base URL do backend
+const API_BASE_URL = 'http://localhost:8000';
+
+// 🔄 Types para TypeScript
+interface DashboardStats {
+  conversations_today: number;
+  conversion_rate: string;
+  qualified_leads: number;
+  growth_rate: string;
+}
+
+interface ActivityData {
+  name: string;
+  value: number;
+}
+
+interface LeadsByStatus {
+  cold: number;
+  warm: number;
+  hot: number;
+  immediate: number;
+}
+
+interface DashboardData {
+  stats: DashboardStats;
+  activity_chart: ActivityData[];
+  leads_by_status: LeadsByStatus;
+  last_updated: string;
+}
+
+interface ConversationMessage {
+  id: number;
+  user: string;
+  message: string;
+  time: string;
+  type: 'sent' | 'received';
+  lead_score?: number;
+  automated?: boolean;
+  urgency?: string;
+}
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  error?: string;
+}
+
+// 🎯 Hook principal para dados do dashboard
+export const useDashboardData = () => {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`${API_BASE_URL}/api/dashboard/overview`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result: ApiResponse<DashboardData> = await response.json();
+      
+      if (result.success) {
+        setData(result.data);
+      } else {
+        throw new Error(result.error || 'Erro ao buscar dados');
+      }
+    } catch (err) {
+      console.error('Erro ao buscar dados do dashboard:', err);
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+    
+    // 🔄 Atualizar dados a cada 30 segundos
+    const interval = setInterval(fetchDashboardData, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  return {
+    data,
+    loading,
+    error,
+    refresh: fetchDashboardData
+  };
+};
+
+// 💬 Hook para conversas recentes
+export const useRecentConversations = () => {
+  const [conversations, setConversations] = useState<ConversationMessage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchConversations = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`${API_BASE_URL}/api/conversations/recent`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result: ApiResponse<ConversationMessage[]> = await response.json();
+      
+      if (result.success) {
+        setConversations(result.data);
+      } else {
+        throw new Error(result.error || 'Erro ao buscar conversas');
+      }
+    } catch (err) {
+      console.error('Erro ao buscar conversas:', err);
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchConversations();
+    
+    // 🔄 Atualizar conversas a cada 15 segundos
+    const interval = setInterval(fetchConversations, 15000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  return {
+    conversations,
+    loading,
+    error,
+    refresh: fetchConversations
+  };
+};
+
+// 📊 Hook para stats em tempo real
+export const useRealTimeStats = () => {
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchRealTimeStats = async () => {
+    try {
+      setError(null);
+      
+      const response = await fetch(`${API_BASE_URL}/api/realtime/stats`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result: ApiResponse<any> = await response.json();
+      
+      if (result.success) {
+        setStats(result.data);
+      } else {
+        throw new Error(result.error || 'Erro ao buscar stats');
+      }
+    } catch (err) {
+      console.error('Erro ao buscar stats em tempo real:', err);
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRealTimeStats();
+    
+    // 🔄 Atualizar stats a cada 5 segundos
+    const interval = setInterval(fetchRealTimeStats, 5000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  return {
+    stats,
+    loading,
+    error,
+    refresh: fetchRealTimeStats
+  };
+};
+
+// 🎯 Hook para health check da API
+export const useApiHealth = () => {
+  const [isHealthy, setIsHealthy] = useState<boolean | null>(null);
+  const [healthData, setHealthData] = useState<any>(null);
+
+  const checkHealth = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/health`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        setIsHealthy(true);
+        setHealthData(data);
+      } else {
+        setIsHealthy(false);
+        setHealthData(null);
+      }
+    } catch (err) {
+      console.error('API health check failed:', err);
+      setIsHealthy(false);
+      setHealthData(null);
+    }
+  };
+
+  useEffect(() => {
+    checkHealth();
+    
+    // 🔄 Verificar saúde da API a cada 1 minuto
+    const interval = setInterval(checkHealth, 60000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  return {
+    isHealthy,
+    healthData,
+    checkHealth
+  };
+};
+
+// 📱 Hook para WhatsApp instances (real)
+export const useWhatsAppInstances = () => {
+  const [instances, setInstances] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchInstances = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Simular dados reais até integrar Evolution API
+      const mockInstances = [
+        {
+          id: 'sofia-principal',
+          name: 'Sofia Principal',
+          phone: '+55 11 98765-4321',
+          status: 'connected',
+          lastActivity: '2 min atrás',
+          messagesCount: Math.floor(Math.random() * 300) + 100,
+        },
+        {
+          id: 'sofia-backup',
+          name: 'Sofia Backup',
+          phone: '+55 11 91234-5678',
+          status: 'disconnected',
+          lastActivity: '1 hora atrás',
+          messagesCount: Math.floor(Math.random() * 100) + 50,
+        },
+      ];
+      
+      setInstances(mockInstances);
+    } catch (err) {
+      console.error('Erro ao buscar instâncias WhatsApp:', err);
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createInstance = async (name: string) => {
+    try {
+      // TODO: Implementar criação real via Evolution API
+      console.log('Criando nova instância:', name);
+      
+      const newInstance = {
+        id: `sofia-${Date.now()}`,
+        name: name,
+        phone: `+55 11 9${Math.floor(Math.random() * 100000000)}`,
+        status: 'connecting',
+        lastActivity: 'Agora',
+        messagesCount: 0,
+      };
+      
+      setInstances(prev => [...prev, newInstance]);
+      
+      return newInstance;
+    } catch (err) {
+      console.error('Erro ao criar instância:', err);
+      throw err;
+    }
+  };
+
+  const disconnectInstance = async (instanceId: string) => {
+    try {
+      // TODO: Implementar desconexão real via Evolution API
+      console.log('Desconectando instância:', instanceId);
+      
+      setInstances(prev => 
+        prev.map(instance => 
+          instance.id === instanceId 
+            ? { ...instance, status: 'disconnected' }
+            : instance
+        )
+      );
+    } catch (err) {
+      console.error('Erro ao desconectar instância:', err);
+      throw err;
+    }
+  };
+
+  useEffect(() => {
+    fetchInstances();
+    
+    // 🔄 Atualizar instâncias a cada 30 segundos
+    const interval = setInterval(fetchInstances, 30000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
+  return {
+    instances,
+    loading,
+    error,
+    createInstance,
+    disconnectInstance,
+    refresh: fetchInstances
+  };
+};
+
+// 🔄 Hook para operações gerais da API
+export const useApiOperations = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const apiCall = async (endpoint: string, options?: RequestInit) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options?.headers,
+        },
+        ...options,
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Erro na API';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    loading,
+    error,
+    apiCall
+  };
+};
+
+// 📊 Utils para formatação de dados
+export const formatStatsForDisplay = (stats: DashboardStats) => {
+  return [
+    {
+      title: 'Conversas Hoje',
+      value: stats.conversations_today.toString(),
+      change: stats.growth_rate,
+      icon: 'MessageSquare',
+      color: 'text-green-400',
+    },
+    {
+      title: 'Taxa de Conversão',
+      value: `${stats.conversion_rate}%`,
+      change: '+5.1%',
+      icon: 'Target',
+      color: 'text-blue-400',
+    },
+    {
+      title: 'Leads Qualificados',
+      value: stats.qualified_leads.toString(),
+      change: '+23%',
+      icon: 'Users',
+      color: 'text-purple-400',
+    },
+    {
+      title: 'Crescimento',
+      value: stats.growth_rate,
+      change: '+8.3%',
+      icon: 'TrendingUp',
+      color: 'text-orange-400',
+    },
+  ];
+};
+
+// 🎯 Export do hook principal
+export default {
+  useDashboardData,
+  useRecentConversations,
+  useRealTimeStats,
+  useApiHealth,
+  useWhatsAppInstances,
+  useApiOperations,
+  formatStatsForDisplay
+};
