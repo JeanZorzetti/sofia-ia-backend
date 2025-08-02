@@ -4,7 +4,7 @@
 
 ## ✅ **STATUS: MVP 85% COMPLETO - PRONTO PARA BETA**
 
-### 🎯 **Última Atualização: Loading States e Error Handling Resolvidos**
+### 🎯 **Última Atualização: Configuração de Porta Corrigida**
 
 - ✅ **Frontend-Backend conectados** com dados reais
 - ✅ **Loading states funcionais** em todos componentes  
@@ -12,6 +12,7 @@
 - ✅ **Configuração de ambiente** automática (dev/prod)
 - ✅ **Scripts de inicialização** automática
 - ✅ **Dashboard dinâmico** com auto-refresh 30s
+- ✅ **Porta frontend corrigida** para 5173 (padrão Vite)
 
 ---
 
@@ -24,10 +25,15 @@
 **Escolha opção [3] - INICIAR AMBOS**
 
 ### **2. URLs do sistema:**
-- 🌐 **Frontend:** http://localhost:5173
+- 🌐 **Frontend:** http://localhost:5173 ✅
 - 📊 **Backend:** http://localhost:8001  
 - 🔍 **Health Check:** http://localhost:8001/health
 - 📈 **API Dashboard:** http://localhost:8001/api/dashboard/overview
+
+### **3. Se frontend não iniciar na porta 5173:**
+```bash
+📁 fix-frontend-port.bat
+```
 
 ---
 
@@ -37,14 +43,16 @@
 ```typescript
 // ✅ DESENVOLVIMENTO (localhost)
 API_BASE_URL = 'http://localhost:8001'
+FRONTEND_PORT = 5173
 
 // ✅ PRODUÇÃO (deploy)  
 API_BASE_URL = 'https://sofiaia.roilabs.com.br'
+FRONTEND_PORT = auto (via Vercel/EasyPanel)
 ```
 
 ### **🎯 Como funciona:**
-- **Local:** Detecta `localhost` → usa porta 8001
-- **Produção:** Detecta domínio real → usa EasyPanel (porta 8000)
+- **Local:** Detecta `localhost` → Backend:8001, Frontend:5173
+- **Produção:** Detecta domínio real → Backend:EasyPanel, Frontend:Vercel
 - **Zero configuração manual** necessária
 
 ---
@@ -61,11 +69,12 @@ Sofia IA/
 ├── frontend/                ✅ 90% funcional  
 │   ├── src/hooks/           ✅ API conectada
 │   ├── src/components/      ✅ Loading/Error OK
+│   ├── vite.config.ts       ✅ Porta 5173 corrigida
 │   └── package.json         ✅ Dependências OK
 └── scripts/                 ✅ Inicialização automática
     ├── INICIAR-SOFIA-COMPLETO.bat
-    ├── start-sofia-8001.bat
-    └── commit-environment-fix.bat
+    ├── fix-frontend-port.bat
+    └── commit-port-fix.bat
 ```
 
 ### **🔗 Endpoints Funcionais:**
@@ -124,6 +133,35 @@ if (error) return (
 
 ---
 
+## 🔧 **CORREÇÃO RECENTE: PORTA FRONTEND**
+
+### **🚨 Problema identificado:**
+```bash
+# ❌ ANTES (Problema):
+Port 8080 is in use, trying another one...
+Port 8081 is in use, trying another one...
+Local: http://localhost:8082/  # Porta aleatória!
+
+# ✅ DEPOIS (Corrigido):  
+Local: http://localhost:5173/  # Porta padrão Vite!
+```
+
+### **🔧 Solução aplicada:**
+```typescript
+// vite.config.ts
+server: {
+  host: "::",
+  port: 5173,  // ✅ Porta padrão Vite
+},
+```
+
+### **📁 Scripts de correção:**
+- `fix-frontend-port.bat` - Corrige porta automaticamente
+- `INICIAR-SOFIA-COMPLETO.bat` - URLs atualizadas
+- `commit-port-fix.bat` - Commit da correção
+
+---
+
 ## 🎯 **DEPLOY E PRODUÇÃO**
 
 ### **📊 EasyPanel (Atual):**
@@ -133,7 +171,7 @@ if (error) return (
 - ✅ **Configuração:** Não precisa alterar
 
 ### **🔄 Processo de Deploy:**
-1. **Commit local:** `commit-environment-fix.bat`
+1. **Commit local:** `commit-port-fix.bat`
 2. **Push GitHub:** Automático no script
 3. **EasyPanel:** Auto-deploy via GitHub webhook
 4. **Frontend:** Deploy Vercel via GitHub
@@ -161,6 +199,7 @@ curl http://localhost:8001/api/dashboard/overview
 - 📈 **Gráfico atualiza** automaticamente
 - ⏳ **Loading states** aparecem durante requisições
 - ❌ **Error handling** funciona se backend offline
+- 🌐 **Porta consistente** sempre 5173
 
 ---
 
@@ -195,6 +234,17 @@ curl http://localhost:8001/api/dashboard/overview
 ---
 
 ## 🛠️ **TROUBLESHOOTING**
+
+### **❌ Problema: "Frontend não inicia na porta 5173"**
+```bash
+# Solução rápida:
+./fix-frontend-port.bat
+
+# Ou manual:
+# 1. Fechar frontend (Ctrl+C)
+# 2. npm run dev novamente
+# 3. Verificar vite.config.ts tem port: 5173
+```
 
 ### **❌ Problema: "Backend não conecta"**
 ```bash
@@ -234,6 +284,11 @@ curl http://localhost:8001/health
 - `useApiHealth()` - Status da API
 - `useWhatsAppInstances()` - Gestão WhatsApp
 
+### **🌐 URLs Corretas:**
+- **Frontend DEV:** http://localhost:5173 ✅
+- **Backend DEV:** http://localhost:8001 ✅
+- **Produção:** https://sofiaia.roilabs.com.br ✅
+
 ---
 
 ## 🏆 **CONCLUSÃO**
@@ -245,6 +300,7 @@ curl http://localhost:8001/health
 - ✅ **Loading/Error handling** profissionais
 - ✅ **Configuração de ambiente** automática
 - ✅ **Scripts de deploy** simplificados
+- ✅ **Porta frontend corrigida** e consistente
 
 **🎯 Próximo marco:** Primeiro cliente beta processando leads reais em 1-2 semanas.
 
@@ -255,4 +311,5 @@ curl http://localhost:8001/health
 **Criado por:** ROI Labs  
 **Contato:** contato@roilabs.com.br  
 **GitHub:** https://github.com/JeanZorzetti/sofia-ia-sdr  
-**Version:** 2.0.0 (Janeiro 2025)
+**Version:** 2.0.1 (Janeiro 2025)  
+**Última correção:** Porta frontend 5173
