@@ -14,7 +14,7 @@
   },
   "keywords": [
     "whatsapp",
-    "real-estate", 
+    "real-estate",
     "sdr",
     "automation",
     "chatbot",
@@ -33,26 +33,27 @@
     "url": "https://github.com/JeanZorzetti/sofia-ia-sdr.git"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "helmet": "^7.0.0",
+    "@anthropic-ai/sdk": "^0.24.3",
+    "axios": "^1.11.0",
+    "bcryptjs": "^2.4.3",
+    "colors": "^1.4.0",
     "compression": "^1.7.4",
-    "socket.io": "^4.7.2",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "winston": "^3.10.0",
+    "express": "^4.18.2",
+    "helmet": "^7.0.0",
     "joi": "^17.9.2",
     "jsonwebtoken": "^9.0.2",
-    "bcryptjs": "^2.4.3",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.2",
-    "axios": "^1.5.0",
     "pg": "^8.11.3",
     "redis": "^4.6.8",
-    "@anthropic-ai/sdk": "^0.24.3"
+    "socket.io": "^4.7.2",
+    "winston": "^3.10.0"
   },
   "devDependencies": {
-    "nodemon": "^3.0.1",
-    "jest": "^29.6.2"
+    "jest": "^29.6.2",
+    "nodemon": "^3.0.1"
   },
   "engines": {
     "node": ">=18.0.0"

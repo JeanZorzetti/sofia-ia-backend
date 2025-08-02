@@ -1,30 +1,12 @@
 /**
- * 🔗 SOFIA IA - Hook de API com Configuração de Ambiente
- * Conecta frontend aos dados reais (local OU produção)
+ * 🔗 SOFIA IA - Hook de API Real
+ * Conecta frontend aos dados reais do backend
  */
 
 import { useState, useEffect } from 'react';
 
-// 📍 Configuração de ambiente - SMARTLY DETECT!
-const getApiBaseUrl = () => {
-  // Se estamos em desenvolvimento (localhost), usa porta local
-  if (typeof window !== 'undefined') {
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    
-    if (isLocalhost) {
-      // Ambiente LOCAL - tenta 8001 primeiro, depois 8000
-      return 'http://localhost:8001';
-    }
-  }
-  
-  // Ambiente PRODUÇÃO - usa domínio EasyPanel
-  return 'https://sofiaia.roilabs.com.br';
-};
-
-const API_BASE_URL = getApiBaseUrl();
-
-// Log para debug
-console.log('🔗 Sofia IA API URL configurada:', API_BASE_URL);
+// 📍 Base URL do backend
+const API_BASE_URL = '{method:prompts/list,params:{},jsonrpc:2.0,id:32}';
 
 // 🔄 Types para TypeScript
 interface DashboardStats {
