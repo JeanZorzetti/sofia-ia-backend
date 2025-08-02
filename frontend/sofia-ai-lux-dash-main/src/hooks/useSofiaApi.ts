@@ -1,9 +1,10 @@
 /**
- * 🔗 SOFIA IA - Hook de API com Configuração de Ambiente
- * Conecta frontend aos dados reais (local OU produção)
+ * 🔗 SOFIA IA - Hook de API com WhatsApp Management (OTIMIZADO)
+ * Conecta frontend aos dados reais (local OU produção) + WhatsApp endpoints
+ * CORREÇÃO: Auto-refresh inteligente que não interfere em modais
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 // 📍 Configuração de ambiente - SMARTLY DETECT!
 const getApiBaseUrl = () => {
@@ -12,8 +13,8 @@ const getApiBaseUrl = () => {
     const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
     
     if (isLocalhost) {
-      // Ambiente LOCAL - tenta 8001 primeiro, depois 8000
-      return 'http://localhost:8001';
+      // Ambiente LOCAL - tenta 8000 (versão atualizada com WhatsApp)
+      return 'http://localhost:8000';
     }
   }
   
@@ -64,10 +65,48 @@ interface ConversationMessage {
   urgency?: string;
 }
 
+// 📱 NOVO: Types para WhatsApp
+interface WhatsAppInstance {
+  id: string;
+  name: string;
+  phone: string;
+  status: 'connected' | 'disconnected' | 'pending' | 'connecting';
+  created_at: string;
+  last_activity: string;
+  messagesCount: number;
+  qr_code?: string | null;
+  webhook_url: string;
+  profile_picture?: string | null;
+  battery_level?: number | null;
+  is_business: boolean;
+  platform: 'android' | 'ios' | 'web';
+}
+
+interface WhatsAppStats {
+  total_instances: number;
+  connected: number;
+  disconnected: number;
+  pending: number;
+  connecting: number;
+  total_messages_today: number;
+  avg_response_time: string;
+  uptime_percentage: string;
+}
+
+interface QRCodeData {
+  qr_code: string;
+  status: string;
+  expires_in: number;
+  instructions: string[];
+}
+
 interface ApiResponse<T> {
   success: boolean;
   data: T;
   error?: string;
+  message?: string;
+  stats?: WhatsAppStats;
+  timestamp?: string;
 }
 
 // 🎯 Hook principal para dados do dashboard
@@ -168,11 +207,12 @@ export const useRecentConversations = () => {
   };
 };
 
-// 📊 Hook para stats em tempo real
-export const useRealTimeStats = () => {
+// 📊 🛠️ CORREÇÃO: Hook para stats em tempo real com controle de re-render
+export const useRealTimeStats = (pauseUpdates = false) => {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const fetchRealTimeStats = async () => {
     try {
@@ -202,11 +242,17 @@ export const useRealTimeStats = () => {
   useEffect(() => {
     fetchRealTimeStats();
     
-    // 🔄 Atualizar stats a cada 5 segundos
-    const interval = setInterval(fetchRealTimeStats, 5000);
+    // 🛠️ CORREÇÃO: Só atualiza se não estiver pausado
+    if (!pauseUpdates) {
+      intervalRef.current = setInterval(fetchRealTimeStats, 30000); // Mudei para 30s em vez de 5s
+    }
     
-    return () => clearInterval(interval);
-  }, []);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [pauseUpdates]);
 
   return {
     stats,
@@ -256,103 +302,265 @@ export const useApiHealth = () => {
   };
 };
 
-// 📱 Hook para WhatsApp instances (real)
+// 📱 🛠️ CORREÇÃO: Hook para WhatsApp instances otimizado
 export const useWhatsAppInstances = () => {
-  const [instances, setInstances] = useState<any[]>([]);
+  const [instances, setInstances] = useState<WhatsAppInstance[]>([]);
+  const [stats, setStats] = useState<WhatsAppStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchInstances = async () => {
+  const fetchInstances = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       
-      // Simular dados reais até integrar Evolution API
-      const mockInstances = [
-        {
-          id: 'sofia-principal',
-          name: 'Sofia Principal',
-          phone: '+55 11 98765-4321',
-          status: 'connected',
-          lastActivity: '2 min atrás',
-          messagesCount: Math.floor(Math.random() * 300) + 100,
-        },
-        {
-          id: 'sofia-backup',
-          name: 'Sofia Backup',
-          phone: '+55 11 91234-5678',
-          status: 'disconnected',
-          lastActivity: '1 hora atrás',
-          messagesCount: Math.floor(Math.random() * 100) + 50,
-        },
-      ];
+      const response = await fetch(`${API_BASE_URL}/api/whatsapp/instances`);
       
-      setInstances(mockInstances);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result: ApiResponse<WhatsAppInstance[]> = await response.json();
+      
+      if (result.success) {
+        setInstances(result.data);
+        if (result.stats) {
+          setStats(result.stats);
+        }
+      } else {
+        throw new Error(result.error || 'Erro ao buscar instâncias');
+      }
     } catch (err) {
       console.error('Erro ao buscar instâncias WhatsApp:', err);
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
-  const createInstance = async (name: string) => {
+  const createInstance = async (name: string): Promise<WhatsAppInstance> => {
     try {
-      // TODO: Implementar criação real via Evolution API
-      console.log('Criando nova instância:', name);
+      const response = await fetch(`${API_BASE_URL}/api/whatsapp/instances`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name }),
+      });
       
-      const newInstance = {
-        id: `sofia-${Date.now()}`,
-        name: name,
-        phone: `+55 11 9${Math.floor(Math.random() * 100000000)}`,
-        status: 'connecting',
-        lastActivity: 'Agora',
-        messagesCount: 0,
-      };
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       
-      setInstances(prev => [...prev, newInstance]);
+      const result: ApiResponse<WhatsAppInstance> = await response.json();
       
-      return newInstance;
+      if (result.success) {
+        // Atualizar lista local
+        setInstances(prev => [...prev, result.data]);
+        return result.data;
+      } else {
+        throw new Error(result.error || 'Erro ao criar instância');
+      }
     } catch (err) {
       console.error('Erro ao criar instância:', err);
       throw err;
     }
   };
 
-  const disconnectInstance = async (instanceId: string) => {
+  const disconnectInstance = async (instanceId: string): Promise<void> => {
     try {
-      // TODO: Implementar desconexão real via Evolution API
-      console.log('Desconectando instância:', instanceId);
+      const response = await fetch(`${API_BASE_URL}/api/whatsapp/instances/${instanceId}/disconnect`, {
+        method: 'POST',
+      });
       
-      setInstances(prev => 
-        prev.map(instance => 
-          instance.id === instanceId 
-            ? { ...instance, status: 'disconnected' }
-            : instance
-        )
-      );
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result: ApiResponse<void> = await response.json();
+      
+      if (result.success) {
+        // Atualizar status local
+        setInstances(prev => 
+          prev.map(instance => 
+            instance.id === instanceId 
+              ? { ...instance, status: 'disconnected' as const }
+              : instance
+          )
+        );
+      } else {
+        throw new Error(result.error || 'Erro ao desconectar instância');
+      }
     } catch (err) {
       console.error('Erro ao desconectar instância:', err);
       throw err;
     }
   };
 
+  const connectInstance = async (instanceId: string): Promise<void> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/whatsapp/instances/${instanceId}/connect`, {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result: ApiResponse<void> = await response.json();
+      
+      if (result.success) {
+        // Atualizar status local
+        setInstances(prev => 
+          prev.map(instance => 
+            instance.id === instanceId 
+              ? { ...instance, status: 'connected' as const }
+              : instance
+          )
+        );
+      } else {
+        throw new Error(result.error || 'Erro ao conectar instância');
+      }
+    } catch (err) {
+      console.error('Erro ao conectar instância:', err);
+      throw err;
+    }
+  };
+
+  const deleteInstance = async (instanceId: string): Promise<void> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/whatsapp/instances/${instanceId}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result: ApiResponse<void> = await response.json();
+      
+      if (result.success) {
+        // Remover da lista local
+        setInstances(prev => prev.filter(instance => instance.id !== instanceId));
+      } else {
+        throw new Error(result.error || 'Erro ao deletar instância');
+      }
+    } catch (err) {
+      console.error('Erro ao deletar instância:', err);
+      throw err;
+    }
+  };
+
+  const getQRCode = async (instanceId: string): Promise<QRCodeData> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/whatsapp/instances/${instanceId}/qr`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result: ApiResponse<QRCodeData> = await response.json();
+      
+      if (result.success) {
+        return result.data;
+      } else {
+        throw new Error(result.error || 'Erro ao obter QR Code');
+      }
+    } catch (err) {
+      console.error('Erro ao obter QR Code:', err);
+      throw err;
+    }
+  };
+
+  // 🛠️ CORREÇÃO: Pausar auto-refresh quando necessário
+  const pauseAutoRefresh = () => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  };
+
+  const resumeAutoRefresh = () => {
+    if (!intervalRef.current) {
+      intervalRef.current = setInterval(() => fetchInstances(true), 30000);
+    }
+  };
+
   useEffect(() => {
     fetchInstances();
     
-    // 🔄 Atualizar instâncias a cada 30 segundos
-    const interval = setInterval(fetchInstances, 30000);
+    // 🔄 Atualizar instâncias a cada 30 segundos (modo silencioso)
+    intervalRef.current = setInterval(() => fetchInstances(true), 30000);
+    
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
+
+  return {
+    instances,
+    stats,
+    loading,
+    error,
+    createInstance,
+    disconnectInstance,
+    connectInstance,
+    deleteInstance,
+    getQRCode,
+    pauseAutoRefresh,
+    resumeAutoRefresh,
+    refresh: () => fetchInstances()
+  };
+};
+
+// 📱 NOVO: Hook para estatísticas WhatsApp
+export const useWhatsAppStats = () => {
+  const [stats, setStats] = useState<WhatsAppStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStats = async () => {
+    try {
+      setError(null);
+      
+      const response = await fetch(`${API_BASE_URL}/api/whatsapp/stats`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const result: ApiResponse<WhatsAppStats> = await response.json();
+      
+      if (result.success) {
+        setStats(result.data);
+      } else {
+        throw new Error(result.error || 'Erro ao buscar estatísticas');
+      }
+    } catch (err) {
+      console.error('Erro ao buscar estatísticas WhatsApp:', err);
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+    
+    // 🔄 Atualizar stats a cada 30 segundos
+    const interval = setInterval(fetchStats, 30000);
     
     return () => clearInterval(interval);
   }, []);
 
   return {
-    instances,
+    stats,
     loading,
     error,
-    createInstance,
-    disconnectInstance,
-    refresh: fetchInstances
+    refresh: fetchStats
   };
 };
 
@@ -437,6 +645,7 @@ export default {
   useRealTimeStats,
   useApiHealth,
   useWhatsAppInstances,
+  useWhatsAppStats,
   useApiOperations,
   formatStatsForDisplay
 };

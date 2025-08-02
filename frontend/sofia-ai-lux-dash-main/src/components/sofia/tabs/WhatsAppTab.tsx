@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -15,19 +15,45 @@ import {
   RefreshCw,
   X,
   Wifi,
-  WifiOff
+  WifiOff,
+  Trash2
 } from 'lucide-react';
 import { useWhatsAppInstances, useRealTimeStats } from '@/hooks/useSofiaApi';
 
 export const WhatsAppTab = () => {
   // 🔗 Hooks para dados reais
-  const { instances, loading, error, createInstance, disconnectInstance, refresh } = useWhatsAppInstances();
-  const { stats: realTimeStats } = useRealTimeStats();
+  const { 
+    instances, 
+    loading, 
+    error, 
+    createInstance, 
+    disconnectInstance, 
+    deleteInstance, 
+    pauseAutoRefresh, 
+    resumeAutoRefresh, 
+    refresh 
+  } = useWhatsAppInstances();
+  
+  // 🛠️ CORREÇÃO: Stats com controle de pausa quando modal aberto
+  const [modalOpen, setModalOpen] = useState(false);
+  const { stats: realTimeStats } = useRealTimeStats(modalOpen);
   
   // 🎛️ Estados locais
   const [showQR, setShowQR] = useState(false);
   const [newInstanceName, setNewInstanceName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [deletingInstance, setDeletingInstance] = useState<string | null>(null);
+
+  // 🛠️ CORREÇÃO: Controlar auto-refresh quando modal abrir/fechar
+  useEffect(() => {
+    if (showQR) {
+      setModalOpen(true);
+      pauseAutoRefresh?.();
+    } else {
+      setModalOpen(false);
+      resumeAutoRefresh?.();
+    }
+  }, [showQR, pauseAutoRefresh, resumeAutoRefresh]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -72,60 +98,92 @@ export const WhatsAppTab = () => {
     }
   };
 
+  // 🗑️ Deletar instância com confirmação
+  const handleDeleteInstance = async (instanceId: string, instanceName: string) => {
+    const confirmed = window.confirm(
+      `⚠️ Tem certeza que deseja excluir a instância "${instanceName}"?\n\nEsta ação não pode ser desfeita.`
+    );
+    
+    if (!confirmed) return;
+    
+    try {
+      setDeletingInstance(instanceId);
+      await deleteInstance(instanceId);
+    } catch (err) {
+      console.error('Erro ao deletar instância:', err);
+      alert('Erro ao excluir instância. Tente novamente.');
+    } finally {
+      setDeletingInstance(null);
+    }
+  };
+
+  // 🛠️ CORREÇÃO: Fechar modal com limpeza
+  const handleCloseModal = () => {
+    setShowQR(false);
+    setNewInstanceName('');
+  };
+
   // 📊 Calcular estatísticas
   const connectedCount = instances.filter(i => i.status === 'connected').length;
   const disconnectedCount = instances.filter(i => i.status === 'disconnected').length;
   const totalMessages = instances.reduce((sum, i) => sum + i.messagesCount, 0);
 
+  // 🛠️ MODAL CORRIGIDO: Layout fixo e input sem perda de foco
   const QRModal = () => {
     if (!showQR) return null;
 
     return (
       <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <Card className="glass-card w-full max-w-md">
-          <CardHeader className="text-center space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="mx-auto w-12 h-12 bg-primary rounded-full flex items-center justify-center">
-                <Smartphone className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setShowQR(false)}
-                className="absolute top-4 right-4"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+          <CardHeader className="relative text-center pb-4">
+            {/* Botão fechar no canto */}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleCloseModal}
+              className="absolute top-2 right-2 h-8 w-8 p-0"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+            
+            {/* Ícone e título */}
+            <div className="mx-auto w-12 h-12 bg-primary rounded-full flex items-center justify-center mb-3">
+              <Smartphone className="h-6 w-6 text-primary-foreground" />
             </div>
+            
             <CardTitle className="text-foreground font-light tracking-wider-sofia">
               Nova Instância WhatsApp
             </CardTitle>
-            <p className="text-foreground-secondary">
+            <p className="text-foreground-secondary text-sm">
               Crie uma nova instância e conecte seu WhatsApp
             </p>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Nome da Instância */}
+          
+          <CardContent className="space-y-4">
+            {/* 🛠️ CORREÇÃO: Campo nome estático (sem re-render) */}
             <div className="space-y-2">
               <label className="text-sm font-light text-foreground-secondary">
                 Nome da Instância
               </label>
               <Input
+                key="instance-name-input" // Chave fixa para evitar re-mount
                 placeholder="Ex: Sofia Principal"
                 value={newInstanceName}
                 onChange={(e) => setNewInstanceName(e.target.value)}
                 className="bg-background-secondary border-glass-border text-foreground"
+                autoFocus
+                disabled={isCreating}
               />
             </div>
 
-            {/* QR Code Real (simulado por enquanto) */}
-            <div className="aspect-square bg-white rounded-card p-4 flex items-center justify-center">
-              <div className="w-full h-full bg-black/10 rounded grid grid-cols-10 gap-1">
+            {/* 🛠️ CORREÇÃO: QR Code com tamanho fixo */}
+            <div className="bg-white rounded-lg p-4 mx-auto" style={{ width: '200px', height: '200px' }}>
+              <div className="w-full h-full bg-black/10 rounded grid grid-cols-10 gap-px">
                 {Array.from({ length: 100 }).map((_, i) => (
                   <div
                     key={i}
                     className={`
-                      aspect-square rounded-sm
+                      rounded-sm
                       ${Math.random() > 0.5 ? 'bg-black' : 'bg-white'}
                     `}
                   />
@@ -133,22 +191,18 @@ export const WhatsAppTab = () => {
               </div>
             </div>
 
-            <div className="text-center space-y-2">
-              <p className="text-sm text-foreground-secondary">
-                1. Abra o WhatsApp no seu celular
+            {/* Instruções compactas */}
+            <div className="bg-background-secondary/50 rounded-lg p-3 text-center space-y-1">
+              <p className="text-xs text-foreground-secondary font-medium">
+                📱 Como Conectar:
               </p>
-              <p className="text-sm text-foreground-secondary">
-                2. Vá em Configurações → Aparelhos conectados
-              </p>
-              <p className="text-sm text-foreground-secondary">
-                3. Toque em "Conectar um aparelho"
-              </p>
-              <p className="text-sm text-foreground-secondary">
-                4. Escaneie este código QR
+              <p className="text-xs text-foreground-secondary">
+                WhatsApp → Configurações → Aparelhos conectados → Conectar aparelho → Escanear QR
               </p>
             </div>
 
-            <div className="flex space-x-3">
+            {/* Botões */}
+            <div className="flex gap-3 pt-2">
               <Button 
                 className="flex-1 button-luxury" 
                 onClick={handleCreateInstance}
@@ -163,8 +217,9 @@ export const WhatsAppTab = () => {
               </Button>
               <Button 
                 variant="outline" 
-                onClick={() => setShowQR(false)}
+                onClick={handleCloseModal}
                 disabled={isCreating}
+                className="px-6"
               >
                 Cancelar
               </Button>
@@ -335,31 +390,50 @@ export const WhatsAppTab = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-between pt-4 border-t border-glass-border">
-                    <Button variant="ghost" size="sm" onClick={() => setShowQR(true)}>
-                      <QrCode className="h-4 w-4 mr-2" />
-                      QR Code
-                    </Button>
+                  {/* Botões com layout melhorado */}
+                  <div className="flex justify-between items-center pt-4 border-t border-glass-border">
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => setShowQR(true)}>
+                        <QrCode className="h-4 w-4 mr-1" />
+                        QR
+                      </Button>
+                      
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        className={instance.status === 'connected' ? 'text-red-400 hover:text-red-300' : 'text-green-400 hover:text-green-300'}
+                        onClick={() => {
+                          if (instance.status === 'connected') {
+                            handleDisconnect(instance.id);
+                          }
+                        }}
+                      >
+                        {instance.status === 'connected' ? (
+                          <>
+                            <WifiOff className="h-4 w-4 mr-1" />
+                            Desconectar
+                          </>
+                        ) : (
+                          <>
+                            <Wifi className="h-4 w-4 mr-1" />
+                            Reconectar
+                          </>
+                        )}
+                      </Button>
+                    </div>
+
+                    {/* Botão de deletar */}
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      className={instance.status === 'connected' ? 'text-red-400 hover:text-red-300' : 'text-green-400 hover:text-green-300'}
-                      onClick={() => {
-                        if (instance.status === 'connected') {
-                          handleDisconnect(instance.id);
-                        }
-                      }}
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                      onClick={() => handleDeleteInstance(instance.id, instance.name)}
+                      disabled={deletingInstance === instance.id}
                     >
-                      {instance.status === 'connected' ? (
-                        <>
-                          <WifiOff className="h-4 w-4 mr-2" />
-                          Desconectar
-                        </>
+                      {deletingInstance === instance.id ? (
+                        <RefreshCw className="h-4 w-4 animate-spin" />
                       ) : (
-                        <>
-                          <Wifi className="h-4 w-4 mr-2" />
-                          Reconectar
-                        </>
+                        <Trash2 className="h-4 w-4" />
                       )}
                     </Button>
                   </div>
