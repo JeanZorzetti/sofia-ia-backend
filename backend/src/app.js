@@ -1,20 +1,25 @@
 /**
- * 🏠 SOFIA IA - Backend com Métricas Reais + WhatsApp Management
- * Servidor Express com endpoints para dashboard real e WhatsApp
+ * 🏠 SOFIA IA - Backend com Métricas Reais + QR Codes
+ * Servidor Express com endpoints para dashboard real e QR codes
  */
 
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 
+// 🔗 IMPORTAR QR CODE SERVICE
+const QRCodeService = require('./services/qrcode.service.js');
+
 const app = express();
-const PORT = process.env.PORT || 8000;
+const PORT = 8000;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// 🔗 INICIALIZAR QR CODE SERVICE
+const qrCodeService = new QRCodeService();
 
 // 📊 DADOS SIMULADOS REALISTAS (Base para métricas reais)
 class MetricsDatabase {
@@ -22,7 +27,6 @@ class MetricsDatabase {
         this.leads = this.generateRealisticLeads();
         this.conversations = this.generateRealisticConversations();
         this.analytics = this.generateRealisticAnalytics();
-        this.whatsappInstances = this.generateWhatsAppInstances(); // 📱 NOVO!
     }
 
     generateRealisticLeads() {
@@ -98,42 +102,6 @@ class MetricsDatabase {
                 revenue: Math.floor(Math.random() * 5000000) + 2000000
             }
         };
-    }
-
-    // 📱 NOVO: Gerar instâncias WhatsApp realísticas
-    generateWhatsAppInstances() {
-        return [
-            {
-                id: 'sofia-principal',
-                name: 'Sofia Principal',
-                phone: '+55 11 98765-4321',
-                status: 'connected',
-                created_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
-                last_activity: '2 min atrás',
-                messagesCount: Math.floor(Math.random() * 300) + 100,
-                qr_code: null, // Conectado = sem QR
-                webhook_url: 'https://sofia-ia.com/webhook/whatsapp',
-                profile_picture: 'https://avatars.githubusercontent.com/u/1234567',
-                battery_level: Math.floor(Math.random() * 100),
-                is_business: true,
-                platform: 'android'
-            },
-            {
-                id: 'sofia-backup',
-                name: 'Sofia Backup',
-                phone: '+55 11 91234-5678',
-                status: 'disconnected',
-                created_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-                last_activity: '1 hora atrás',
-                messagesCount: Math.floor(Math.random() * 100) + 50,
-                qr_code: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
-                webhook_url: 'https://sofia-ia.com/webhook/whatsapp-backup',
-                profile_picture: null,
-                battery_level: null,
-                is_business: false,
-                platform: 'web'
-            }
-        ];
     }
 
     // Métricas em tempo real
@@ -217,103 +185,6 @@ class MetricsDatabase {
             immediate: statusCount.immediate || 0
         };
     }
-
-    // 📱 NOVO: Métodos para WhatsApp
-    getWhatsAppInstances() {
-        return this.whatsappInstances;
-    }
-
-    createWhatsAppInstance(name) {
-        const newInstance = {
-            id: `sofia-${Date.now()}`,
-            name: name,
-            phone: `+55 11 9${Math.floor(Math.random() * 100000000)}`,
-            status: 'pending',
-            created_at: new Date().toISOString(),
-            last_activity: 'Nunca',
-            messagesCount: 0,
-            qr_code: this.generateQRCode(),
-            webhook_url: `https://sofia-ia.com/webhook/${name.toLowerCase().replace(/\s+/g, '-')}`,
-            profile_picture: null,
-            battery_level: null,
-            is_business: false,
-            platform: 'web'
-        };
-        
-        this.whatsappInstances.push(newInstance);
-        
-        // Simular transição de estados
-        setTimeout(() => {
-            const instance = this.whatsappInstances.find(i => i.id === newInstance.id);
-            if (instance) {
-                instance.status = 'connecting';
-            }
-        }, 2000);
-        
-        return newInstance;
-    }
-
-    disconnectWhatsAppInstance(instanceId) {
-        const instance = this.whatsappInstances.find(i => i.id === instanceId);
-        if (instance) {
-            instance.status = 'disconnected';
-            instance.qr_code = this.generateQRCode();
-            instance.last_activity = 'Agora';
-            return true;
-        }
-        return false;
-    }
-
-    connectWhatsAppInstance(instanceId) {
-        const instance = this.whatsappInstances.find(i => i.id === instanceId);
-        if (instance) {
-            instance.status = 'connected';
-            instance.qr_code = null;
-            instance.last_activity = 'Agora';
-            instance.phone = `+55 11 9${Math.floor(Math.random() * 100000000)}`;
-            return true;
-        }
-        return false;
-    }
-
-    deleteWhatsAppInstance(instanceId) {
-        const index = this.whatsappInstances.findIndex(i => i.id === instanceId);
-        if (index !== -1) {
-            this.whatsappInstances.splice(index, 1);
-            return true;
-        }
-        return false;
-    }
-
-    generateQRCode() {
-        // Simular QR code base64
-        const qrMatrix = [];
-        for (let i = 0; i < 25; i++) {
-            const row = [];
-            for (let j = 0; j < 25; j++) {
-                row.push(Math.random() > 0.5 ? 1 : 0);
-            }
-            qrMatrix.push(row);
-        }
-        return `qr_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    }
-
-    getWhatsAppStats() {
-        const connectedCount = this.whatsappInstances.filter(i => i.status === 'connected').length;
-        const disconnectedCount = this.whatsappInstances.filter(i => i.status === 'disconnected').length;
-        const totalMessages = this.whatsappInstances.reduce((sum, i) => sum + i.messagesCount, 0);
-        
-        return {
-            total_instances: this.whatsappInstances.length,
-            connected: connectedCount,
-            disconnected: disconnectedCount,
-            pending: this.whatsappInstances.filter(i => i.status === 'pending').length,
-            connecting: this.whatsappInstances.filter(i => i.status === 'connecting').length,
-            total_messages_today: totalMessages,
-            avg_response_time: '1.2s',
-            uptime_percentage: connectedCount > 0 ? ((connectedCount / this.whatsappInstances.length) * 100).toFixed(1) : '0.0'
-        };
-    }
 }
 
 // Instância global do banco de dados simulado
@@ -321,55 +192,22 @@ const db = new MetricsDatabase();
 
 // 🚀 ENDPOINTS DA API
 
-// 🏠 Rota raiz - Página inicial da API
-app.get('/', (req, res) => {
-    console.log('🏠 Página inicial da API acessada');
-    res.json({
-        service: 'Sofia IA Backend',
-        version: '2.1.0', // ✨ VERSÃO ATUALIZADA COM WHATSAPP
-        status: 'online',
-        description: 'Sistema SDR Inteligente para Imobiliárias',
-        documentation: {
-            health: '/health',
-            dashboard: '/api/dashboard/overview',
-            conversations: '/api/conversations/recent',
-            leads: '/api/leads',
-            analytics: '/api/analytics/detailed',
-            realtime: '/api/realtime/stats',
-            whatsapp: '/api/whatsapp/instances', // 📱 NOVO!
-            whatsapp_stats: '/api/whatsapp/stats' // 📱 NOVO!
-        },
-        features: [
-            'Dashboard Analytics em tempo real',
-            'Gestão de leads com IA',
-            'Conversas WhatsApp automatizadas',
-            'Múltiplas instâncias WhatsApp', // 📱 NOVO!
-            'QR codes dinâmicos', // 📱 NOVO!
-            'Webhooks bidirecionais', // 📱 NOVO!
-            'Relatórios avançados',
-            'API RESTful completa'
-        ],
-        developer: {
-            company: 'ROI Labs',
-            contact: 'contato@roilabs.com.br',
-            repository: 'https://github.com/JeanZorzetti/sofia-ia-backend'
-        },
-        timestamp: new Date().toISOString()
-    });
-});
-
 // Health check
 app.get('/health', (req, res) => {
     console.log('📊 Health check requisitado');
+    
+    const qrCodeStats = qrCodeService.getQRCodeStats();
+    
     res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
         service: 'Sofia IA Backend',
         version: '2.1.0',
         uptime: process.uptime(),
-        environment: process.env.NODE_ENV || 'development',
-        port: PORT,
-        whatsapp_status: 'ready' // 📱 NOVO!
+        qrcode_system: {
+            status: 'active',
+            stats: qrCodeStats
+        }
     });
 });
 
@@ -545,219 +383,131 @@ app.get('/api/analytics/period', (req, res) => {
     });
 });
 
-// 📱 ========== WHATSAPP ENDPOINTS (NOVOS!) ==========
+// 🔗 ========== QR CODES ENDPOINTS BÁSICOS ==========
 
-// 📱 Listar todas as instâncias WhatsApp
-app.get('/api/whatsapp/instances', (req, res) => {
-    console.log('📱 Instâncias WhatsApp requisitadas');
-    
-    const instances = db.getWhatsAppInstances();
-    const stats = db.getWhatsAppStats();
-    
-    res.json({
-        success: true,
-        data: instances,
-        stats: stats,
-        timestamp: new Date().toISOString()
-    });
-});
-
-// 📱 Criar nova instância WhatsApp
-app.post('/api/whatsapp/instances', (req, res) => {
-    console.log('📱 Criando nova instância WhatsApp');
-    
-    const { name } = req.body;
-    
-    if (!name || name.trim().length === 0) {
-        return res.status(400).json({
-            success: false,
-            error: 'Nome da instância é obrigatório'
-        });
-    }
+// 📊 Estatísticas QR Codes
+app.get('/api/whatsapp/qrcode-stats', (req, res) => {
+    console.log('📊 Estatísticas QR Codes requisitadas');
     
     try {
-        const newInstance = db.createWhatsAppInstance(name.trim());
+        const stats = qrCodeService.getQRCodeStats();
         
-        res.status(201).json({
+        res.json({
             success: true,
-            data: newInstance,
-            message: 'Instância criada com sucesso. Escaneie o QR Code para conectar.'
+            data: stats,
+            timestamp: new Date().toISOString()
         });
+        
     } catch (error) {
+        console.error('❌ Erro ao obter estatísticas QR Code:', error);
         res.status(500).json({
             success: false,
-            error: 'Erro interno ao criar instância'
+            error: 'Erro ao obter estatísticas QR Code',
+            details: error.message
         });
     }
 });
 
-// 📱 Obter instância específica
-app.get('/api/whatsapp/instances/:id', (req, res) => {
-    console.log(`📱 Instância ${req.params.id} requisitada`);
+// 📱 Simular instâncias WhatsApp (para testes sem Evolution API)
+app.get('/api/whatsapp/instances', (req, res) => {
+    console.log('📱 Instâncias WhatsApp simuladas requisitadas');
     
-    const instance = db.getWhatsAppInstances().find(i => i.id === req.params.id);
-    
-    if (!instance) {
-        return res.status(404).json({
-            success: false,
-            error: 'Instância não encontrada'
-        });
-    }
-    
-    res.json({
-        success: true,
-        data: instance
-    });
-});
-
-// 📱 Desconectar instância WhatsApp
-app.post('/api/whatsapp/instances/:id/disconnect', (req, res) => {
-    console.log(`📱 Desconectando instância ${req.params.id}`);
-    
-    const success = db.disconnectWhatsAppInstance(req.params.id);
-    
-    if (!success) {
-        return res.status(404).json({
-            success: false,
-            error: 'Instância não encontrada'
-        });
-    }
-    
-    res.json({
-        success: true,
-        message: 'Instância desconectada com sucesso'
-    });
-});
-
-// 📱 Conectar instância WhatsApp
-app.post('/api/whatsapp/instances/:id/connect', (req, res) => {
-    console.log(`📱 Conectando instância ${req.params.id}`);
-    
-    const success = db.connectWhatsAppInstance(req.params.id);
-    
-    if (!success) {
-        return res.status(404).json({
-            success: false,
-            error: 'Instância não encontrada'
-        });
-    }
-    
-    res.json({
-        success: true,
-        message: 'Instância conectada com sucesso'
-    });
-});
-
-// 📱 Deletar instância WhatsApp
-app.delete('/api/whatsapp/instances/:id', (req, res) => {
-    console.log(`📱 Deletando instância ${req.params.id}`);
-    
-    const success = db.deleteWhatsAppInstance(req.params.id);
-    
-    if (!success) {
-        return res.status(404).json({
-            success: false,
-            error: 'Instância não encontrada'
-        });
-    }
-    
-    res.json({
-        success: true,
-        message: 'Instância deletada com sucesso'
-    });
-});
-
-// 📱 Obter QR Code de uma instância
-app.get('/api/whatsapp/instances/:id/qr', (req, res) => {
-    console.log(`📱 QR Code da instância ${req.params.id} requisitado`);
-    
-    const instance = db.getWhatsAppInstances().find(i => i.id === req.params.id);
-    
-    if (!instance) {
-        return res.status(404).json({
-            success: false,
-            error: 'Instância não encontrada'
-        });
-    }
-    
-    if (instance.status === 'connected') {
-        return res.status(400).json({
-            success: false,
-            error: 'Instância já está conectada'
-        });
-    }
-    
-    // Gerar novo QR code se necessário
-    if (!instance.qr_code) {
-        instance.qr_code = db.generateQRCode();
-    }
-    
-    res.json({
-        success: true,
-        data: {
-            qr_code: instance.qr_code,
-            status: instance.status,
-            expires_in: 45, // segundos
-            instructions: [
-                'Abra o WhatsApp no seu celular',
-                'Vá em Configurações → Aparelhos conectados',
-                'Toque em "Conectar um aparelho"',
-                'Escaneie este código QR'
-            ]
+    const simulatedInstances = [
+        {
+            id: 'sofia-principal',
+            name: 'sofia-principal',
+            status: 'close',
+            phone: null,
+            profileName: null,
+            messagesCount: 0,
+            contactsCount: 0,
+            chatsCount: 0
+        },
+        {
+            id: 'sofia-backup',
+            name: 'sofia-backup',
+            status: 'close',
+            phone: null,
+            profileName: null,
+            messagesCount: 0,
+            contactsCount: 0,
+            chatsCount: 0
         }
-    });
-});
-
-// 📱 Estatísticas gerais WhatsApp
-app.get('/api/whatsapp/stats', (req, res) => {
-    console.log('📱 Estatísticas WhatsApp requisitadas');
-    
-    const stats = db.getWhatsAppStats();
+    ];
     
     res.json({
         success: true,
-        data: stats,
-        timestamp: new Date().toISOString()
+        data: simulatedInstances,
+        total: simulatedInstances.length,
+        timestamp: new Date().toISOString(),
+        source: 'simulated_for_testing'
     });
 });
 
-// 📱 Webhook para receber mensagens (simulado)
-app.post('/api/whatsapp/webhook/:instanceId', (req, res) => {
-    console.log(`📱 Webhook recebido para instância ${req.params.instanceId}`);
-    console.log('Dados recebidos:', req.body);
+// 🔗 Gerar QR Code simulado (para testes)
+app.post('/api/whatsapp/instances/:instanceName/qrcode', async (req, res) => {
+    console.log(`🔗 Gerando QR Code simulado para ${req.params.instanceName}`);
     
-    // Aqui seria processado com Claude AI, mas por ora só logamos
-    const { message, from, type } = req.body;
-    
-    // Simular processamento
-    setTimeout(() => {
-        console.log(`📱 Mensagem processada: ${message}`);
-        // Aqui seria enviada resposta automática via Evolution API
-    }, 1000);
-    
-    res.json({
-        success: true,
-        message: 'Webhook processado com sucesso'
-    });
+    try {
+        // Simular QR Code base64
+        const simulatedQRCode = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg==';
+        
+        const result = {
+            success: true,
+            data: {
+                instanceName: req.params.instanceName,
+                qrcode: simulatedQRCode,
+                status: 'generated',
+                generated_at: new Date().toISOString(),
+                expires_at: new Date(Date.now() + 60000).toISOString(), // 1 minuto
+                cache_hit: false,
+                simulated: true
+            }
+        };
+        
+        res.json({
+            success: result.success,
+            data: result.data,
+            timestamp: new Date().toISOString(),
+            source: 'simulated_qrcode'
+        });
+        
+    } catch (error) {
+        console.error('❌ Erro ao gerar QR Code simulado:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao gerar QR Code simulado',
+            details: error.message
+        });
+    }
 });
 
 // 🚀 Iniciar servidor
 app.listen(PORT, () => {
     console.log('🏠 ===================================');
-    console.log('🚀 SOFIA IA BACKEND v2.1.0 INICIADO!');
+    console.log('🚀 SOFIA IA BACKEND INICIADO!');
+    console.log('🔗 COM QR CODES HABILITADOS!');
     console.log('🏠 ===================================');
     console.log(`📍 URL: http://localhost:${PORT}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log(`📊 Health: http://localhost:${PORT}/health`);
     console.log(`📈 Dashboard: http://localhost:${PORT}/api/dashboard/overview`);
     console.log(`💬 Conversas: http://localhost:${PORT}/api/conversations/recent`);
     console.log(`👥 Leads: http://localhost:${PORT}/api/leads`);
-    console.log(`📱 WhatsApp: http://localhost:${PORT}/api/whatsapp/instances`); // 📱 NOVO!
+    console.log('🏠 ===================================');
+    console.log('🔗 === QR CODES ENDPOINTS ===');
+    console.log(`📊 QR Stats: http://localhost:${PORT}/api/whatsapp/qrcode-stats`);
+    console.log(`📱 Instâncias: http://localhost:${PORT}/api/whatsapp/instances`);
+    console.log(`🔗 QR Code: POST http://localhost:${PORT}/api/whatsapp/instances/:name/qrcode`);
     console.log('🏠 ===================================');
     console.log('✅ Pronto para conectar com o frontend!');
-    console.log(`🔗 Configure o frontend para: http://localhost:${PORT}`);
-    console.log('📱 WhatsApp Management: ATIVO');
+    console.log('🔗 Configure o frontend para: http://localhost:8000');
+    console.log('🔗 QR Code System: ATIVO (Mode: Simulado)');
     console.log('🏠 ===================================');
+    
+    // Inicializar limpeza de cache a cada 30 segundos
+    setInterval(() => {
+        qrCodeService.cleanExpiredQRCodes();
+    }, 30000);
 });
 
 // Error handlers
@@ -772,31 +522,21 @@ process.on('unhandledRejection', (reason) => {
 // Graceful shutdown
 process.on('SIGTERM', () => {
     console.log('👋 Servidor Sofia IA sendo finalizado...');
+    qrCodeService.cleanExpiredQRCodes();
     process.exit(0);
 });
 
 // 📝 Log das rotas disponíveis
 console.log('\n📋 ROTAS DISPONÍVEIS:');
-console.log('GET  /                               - Página inicial da API');
-console.log('GET  /health                         - Health check');
-console.log('GET  /api/dashboard/overview         - Métricas dashboard');
-console.log('GET  /api/conversations/recent       - Conversas recentes');
-console.log('GET  /api/leads                      - Lista de leads');
-console.log('GET  /api/leads/:id                  - Lead específico');
-console.log('GET  /api/analytics/detailed         - Analytics completos');
-console.log('GET  /api/analytics/period           - Métricas por período');
-console.log('GET  /api/realtime/stats             - Stats em tempo real');
-console.log('📱 === WHATSAPP ENDPOINTS (NOVOS!) ===');
-console.log('GET  /api/whatsapp/instances         - Listar instâncias WhatsApp');
-console.log('POST /api/whatsapp/instances         - Criar nova instância');
-console.log('GET  /api/whatsapp/instances/:id     - Instância específica');
-console.log('POST /api/whatsapp/instances/:id/disconnect - Desconectar');
-console.log('POST /api/whatsapp/instances/:id/connect    - Conectar');
-console.log('DELETE /api/whatsapp/instances/:id   - Deletar instância');
-console.log('GET  /api/whatsapp/instances/:id/qr  - Obter QR Code');
-console.log('GET  /api/whatsapp/stats             - Estatísticas WhatsApp');
-console.log('POST /api/whatsapp/webhook/:id       - Webhook mensagens');
+console.log('GET  /health                        - Health check');
+console.log('GET  /api/dashboard/overview        - Métricas dashboard');
+console.log('GET  /api/conversations/recent      - Conversas recentes');
+console.log('GET  /api/leads                     - Lista de leads');
+console.log('GET  /api/leads/:id                 - Lead específico');
+console.log('GET  /api/analytics/detailed        - Analytics completos');
+console.log('GET  /api/analytics/period          - Métricas por período');
+console.log('GET  /api/realtime/stats            - Stats em tempo real');
+console.log('GET  /api/whatsapp/qrcode-stats     - Estatísticas QR Codes');
+console.log('GET  /api/whatsapp/instances        - Lista instâncias');
+console.log('POST /api/whatsapp/instances/:name/qrcode - Gerar QR Code');
 console.log('');
-
-// Exportar app para testes
-module.exports = app;

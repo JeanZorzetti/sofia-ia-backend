@@ -1,0 +1,56 @@
+# 🔐 VARIÁVEIS DE AMBIENTE PARA EASYPANEL
+# Copie estas variáveis para EasyPanel → lais-ia-backend → Environment
+
+NODE_ENV=production
+PORT=8000
+
+# URLs
+WEBHOOK_URL=https://lais-ia-api.roilabs.com.br
+FRONTEND_URL=https://sofia-ia.roilabs.com.br
+ALLOWED_ORIGINS=https://sofia-ia.roilabs.com.br,https://n8n.roilabs.com.br
+
+# N8N Integration
+N8N_WEBHOOK_URL=https://n8n.roilabs.com.br
+N8N_API_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJlOGM4OTNiNC1kZDJiLTRmZGQtYTNjNy02Mjc3MjJjMjU0NjEiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzUzMjAxNjExfQ.dNkFl5bbxuVnCcVx6-8cCfJYE8Fw5rsA_z_rf0YjWC0
+ENABLE_N8N=true
+
+# Supabase Database
+DATABASE_URL=postgresql://postgres.flxkvravpkgjkhhwayoq:PAzo18**@aws-0-sa-east-1.pooler.supabase.com:6543/postgres
+SUPABASE_URL=https://flxkvravpkgjkhhwayoq.supabase.co
+SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZseGt2cmF2cGtnamtoaHdheW9xIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA2OTgyNTMsImV4cCI6MjA2NjI3NDI1M30.Un3CeZ6svx8GqmfxsF-27M4wbFCS7bUoJtsbRfNHuDU
+SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZseGt2cmF2cGtnamtoaHdheW9xIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MDY5ODI1MywiZXhwIjoyMDY2Mjc0MjUzfQ.B91JM-vDI3TqrxZeb86jaLUKRkMME_wG67c06iaqnBE
+
+# Redis Cache
+REDIS_URL=redis://default:1426165205079553fd74@dados_redis:6379
+REDIS_PASSWORD=1426165205079553fd74
+
+# Evolution API
+EVOLUTION_API_URL=https://evolutionapi.roilabs.com.br
+EVOLUTION_API_KEY=SuOOmamlmXs4NV3nkxpHAy7z3rcurbIz
+EVOLUTION_INSTANCE_NAME=sofia_ia_roilabs
+
+# Claude AI
+ANTHROPIC_API_KEY=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
+CLAUDE_MODEL=claude-3-5-sonnet-20241022
+
+# Security
+JWT_SECRET=huojVJ31Xq6e!DGFl@A&2tw7Nv&m4VWT8Gpnxt4!cvLIcQeG63R^^hB^xp#gr^A^
+JWT_EXPIRES_IN=24
+BCRYPT_SALT_ROUNDS=12
+
+# Company
+COMPANY_NAME=ROI Labs
+COMPANY_PHONE=+5562983443919
+COMPANY_EMAIL=contato@roilabs.com.br
+
+# Production optimizations
+LOG_LEVEL=warn
+DEBUG_MODE=false
+RATE_LIMIT_REQUESTS=1000
+DB_POOL_MAX=20
+REQUEST_TIMEOUT=10000
+
+# EasyPanel
+VIRTUAL_HOST=lais-ia-api.roilabs.com.br
+LETSENCRYPT_HOST=lais-ia-api.roilabs.com.br
+LETSENCRYPT_EMAIL=contato@roilabs.com.br
